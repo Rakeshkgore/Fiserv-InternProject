@@ -3,10 +3,15 @@ package drd.intern.project;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -253,6 +258,7 @@ public class MyController{
     //Host and Port
     @FXML TextField HOST;
     @FXML TextField PORT;
+    @FXML Button HELP;
     public String host;
     public int port;
     //Errors
@@ -281,7 +287,7 @@ public class MyController{
     public boolean isValid;
 
     public void initialize() {
-        if(new File("C:/Users/" + userName + "/Desktop/drd-gui-data.txt").isFile()) {
+        if(new File("C:/Users/" + userName + "/Documents/drd-gui-data.txt").isFile()) {
             readData();
         }
 
@@ -329,9 +335,11 @@ public class MyController{
         tooltipBUCKETMIN1.setText("Enter Bucket Lower Boundary");
         BUCKET_MIN_1.setTooltip(tooltipBUCKETMIN1);
 
+
+
     }
     @FXML
-    public void handleButtonClick(ActionEvent event) {
+    public void handleButtonClick(ActionEvent event) throws IOException {
 
         if(event.getSource() == BUILD){
             whiteoutBuckets();
@@ -415,10 +423,10 @@ public class MyController{
                     for(int i = 0; i < list.size(); i++ ){
                         run(list.get(i));
                     }
-                    Alert hostFailed = new Alert(Alert.AlertType.CONFIRMATION);
+                    Alert hostFailed = new Alert(Alert.AlertType.INFORMATION);
                     hostFailed.setTitle("Confirmation");
                     hostFailed.setHeaderText(null);
-                    hostFailed.setContentText("Query was sent to DRD");
+                    hostFailed.setContentText("Query was received by the DRD");
                     hostFailed.showAndWait();
                 } catch (IOException | InterruptedException ioException) {
                     Alert hostFailed = new Alert(Alert.AlertType.ERROR);
@@ -445,7 +453,7 @@ public class MyController{
                 hostFailed.showAndWait();
             }
             clearFields();
-            new File("C:/Users/" + userName + "/Desktop/drd-gui-data.txt").delete();
+            new File("C:/Users/" + userName + "/Documents/drd-gui-data.txt").delete();
         }
         if(event.getSource() == MIDNWID_ADD ) {
             addMIDNWID();
@@ -490,6 +498,82 @@ public class MyController{
 
         if(event.getSource() == BUCKET_REMOVE) {
             removeBucket();
+        }
+
+        if(event.getSource() == HELP) {
+            if(new File("C:/Users/" + userName + "/Documents/drd-gui-instructions.txt").isFile()) {
+                new File("C:/Users/" + userName + "/Documents/drd-gui-instructions.txt").delete();
+            }
+            try {
+                File file = new File("C:/Users/" + userName + "/Documents/drd-gui-instructions.txt");
+                FileWriter fw = new FileWriter(file);
+                PrintWriter pw = new PrintWriter(fw);
+
+                pw.println("GBS Debit Routing Intern Project Summer 2020\n" +
+                        "Interns: Vedant Bhat & Rakesh Gorrepati\n" +
+                        "Mentor: Eric Poliashenko\n" +
+                        "\n" +
+                        "About: A simple gui tool which allows for queries to the DRD and provides capability for groups, who work with the DRD, \n" +
+                        "       to quickly receive a pseudo-response from DRD without having to do all the extra work/time to acquire it through\n" +
+                        "       its normally tedious process. The gui also allows for persistence, i.e. user's inputted values will save after\n" +
+                        "       closing the application, granted that \"clear\" was not used.\n" +
+                        "\n" +
+                        "Tech Stack: Java & JavaFX\n" +
+                        "\n" +
+                        "Instructions:\n" +
+                        "    *Merchant\n" +
+                        "        *Enter Merchant ID\n" +
+                        "        *Fill out NWID(s) from left to right, without leaving empty text fields in between NWIDs\n" +
+                        "    *Bin\n" +
+                        "        *Enter BIN#\n" +
+                        "        *Enter PAN Length\n" +
+                        "        *Enter NWID and Capability Tag\n" +
+                        "            *Capabilities include : P = Pinned\n" +
+                        "                                    L = Billpay-Pinless\n" +
+                        "                                    B = Pinned/Billpay-Pinless\n" +
+                        "                                    A = POS-Pinless\n" +
+                        "                                    C = Billpay-Pinless/POS-Pinless\n" +
+                        "                                    D = Pinned/POS-Pinless\n" +
+                        "                                    E = Pinned/Billpay-Pinless/POS-Pinless\n" +
+                        "                                    F = Signature Debit\n" +
+                        "                                    X = Ecommerce Only\n" +
+                        "            * Format : NWID,CAPA\n" +
+                        "                       41,E\n" +
+                        "                       30,L\n" +
+                        "    *Buckets\n" +
+                        "        *Enter Min and Max\n" +
+                        "        *Enter NWID(s) : In the order of NWID1, NWID2, NWID3, NWID4\n" +
+                        "\t*Minimum required fields:\n" +
+                        "\t    * Merchant ID and 1 associated NWID\n" +
+                        "\t    * 1 Bin# and 1 associated NWID\n" +
+                        "\t    * 1 Bucket and associated NWID\n" +
+                        "\t    * Host & Port\n" +
+                        "\n" +
+                        "Acronyms:\n" +
+                        "\t*MID# : Merchant ID number, a numerical value\n" +
+                        "\t*MID NWID : Network ID associated with the merchant id number\n" +
+                        "\t*PAN Length : Numerical value\n" +
+                        "\t*BIN# : Numerical value\n" +
+                        "\t*BIN NWID : Network ID and Capability Tag, e.g. 41,E\n" +
+                        "\t*Bucket Min : Numerical value, must be less than associated max\n" +
+                        "\t*Bucket Max : Numerical value, must be less than associated min\n" +
+                        "\t*Bucket NWID : Network ID associated with the Bucket\n" +
+                        "\t*Host & Port : DRD related information, where the query will be sent to form the GUI\n" +
+                        "\t*NWID(s) : Any integer between 0 - 74\n" +
+                        "\n" +
+                        "Buttons:\n" +
+                        "    *Clear : Sends clear request to DRD, clears all text fields in gui.\n" +
+                        "    *Build : Sends query to DRD. Given that there are no errors and minimum required fields are fill out.\n" +
+                        "    *Add(\"+\") : Adds text fields\n" +
+                        "    *Delete(\"-\") : Removes text fields\n" +
+                        "\n");
+
+
+                pw.close();
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -3360,7 +3444,7 @@ public class MyController{
                 BUCKET_MIN_5,BUCKET_MAX_5,BUCKET_NWID_5,BUCKET_NWID_55,BUCKET_NWID_555,BUCKET_NWID_5555,
                 BUCKET_MIN_6,BUCKET_MAX_6,BUCKET_NWID_6,BUCKET_NWID_66,BUCKET_NWID_666,BUCKET_NWID_6666, HOST, PORT};
         try {
-            File file = new File("C:/Users/" + userName + "/Desktop/drd-gui-data.txt");
+            File file = new File("C:/Users/" + userName + "/Documents/drd-gui-data.txt");
             FileWriter fw = new FileWriter(file);
             PrintWriter pw = new PrintWriter(fw);
             for(int i = 0; i < row1.length; i++) {
@@ -3403,7 +3487,7 @@ public class MyController{
                 bucket_Counter};
 
         try {
-            File file = new File("C:/Users/" + userName + "/Desktop/drd-gui-data.txt");
+            File file = new File("C:/Users/" + userName + "/Documents/drd-gui-data.txt");
             Scanner scan = new Scanner(file);
             int i =0;
             int j = 1;
