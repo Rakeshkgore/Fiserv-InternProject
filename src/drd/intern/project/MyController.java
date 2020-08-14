@@ -382,8 +382,30 @@ public class MyController{
             if(!(BucketBoundLabel.isVisible())) {
                 finalBucketsBuild = bucketLogic();
             }
-
-
+            boolean bucketRange;
+            int max = Integer.MIN_VALUE;
+            int min = Integer.MAX_VALUE;
+            int j = 0;
+            for(int i = 0; i < finalBucketsBuild.size(); i++){
+                j = j + finalBucketsBuild.get(i).getMax() - finalBucketsBuild.get(i).getMin();
+                if( finalBucketsBuild.get(i).getMax() > max){
+                    max = finalBucketsBuild.get(i).getMax();
+                }
+                if( finalBucketsBuild.get(i).getMin() < min){
+                    min = finalBucketsBuild.get(i).getMin();
+                }
+            }
+            j = j + finalBucketsBuild.size();
+            if(j < max - min){
+                bucketRange = true;
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Bucket Range Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Please check for gaps in bucket ranges");
+                alert.showAndWait();
+            } else {
+                bucketRange = false;
+            }
             boolean mandatoryFields = false;
             if(mandatory1||mandatory2||mandatory3||mandatory4||mandatory5||mandatory6||mandatory7||mandatory8||mandatory9||mandatory10){
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -395,7 +417,8 @@ public class MyController{
             } else {
                 mandatoryFields = true;
             }
-            if(!(BINNWID_ERROR.isVisible() || BIN_ERROR.isVisible() || BINLENGTH_ERROR.isVisible() || BucketBoundLabel.isVisible() || BucketNWIDBoundLabel.isVisible()) && mandatoryFields) {
+            //Main communication with the drd, will send if there are no errors
+            if(!(BINNWID_ERROR.isVisible() || BIN_ERROR.isVisible() || BINLENGTH_ERROR.isVisible() || BucketBoundLabel.isVisible() || BucketNWIDBoundLabel.isVisible()) && mandatoryFields && !bucketRange) {
                 try{
                     run("enable");
                     run("clear");
